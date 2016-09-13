@@ -1,0 +1,12 @@
+<resources>
+    <array name="ItemArray">
+        <item>修改</item>
+        <item>删除</item>
+    </array>
+    <array name="ProjectArray">
+        <item>修改</item>
+        <item>删除</item>
+        <item>记住项目密码</item>
+        <item>取消记住项目密码</item>
+    </array>
+</resources>
