@@ -39,7 +39,7 @@ public class BTMainActivity extends AppCompatActivity {
     private Button sendMsgBtn;
     //private Button scanButton;
    // private Button ClientBtn;
-    private Button ServerBtn;
+    //private Button ServerBtn;
     private BTConnectService mConnectService;
 
     private ListView findedDevices;
@@ -77,7 +77,7 @@ public class BTMainActivity extends AppCompatActivity {
                     Info.setText("已和客户端连接...等待数据传输...");
                     break;
                 case MESSAGE_SEND_FALSE:
-                    Info.setText("数据传输成功，但是存储失败哈哈哈哈哈哈");
+                    Info.setText("数据传输成功，已存在数据，此次传输未存储");
                     break;
                 case MESSAGE_SEND_SUCCEED:
                     Info.setText("数据传输成功，存储成功");
@@ -130,6 +130,7 @@ public class BTMainActivity extends AppCompatActivity {
 
         Info = (TextView)findViewById(R.id.ConnectInfo);
         mConnectService = new BTConnectService(this, mHandler);
+        mConnectService.start();//启动server线程等待连接
      /*   ClientBtn = (Button)findViewById(R.id.ClientBtn);
         ClientBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,7 +141,7 @@ public class BTMainActivity extends AppCompatActivity {
 
         });
         */
-        ServerBtn = (Button)findViewById(R.id.serverMode);
+       /* ServerBtn = (Button)findViewById(R.id.serverMode);
         ServerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -151,7 +152,7 @@ public class BTMainActivity extends AppCompatActivity {
                //doListen();
             }
 
-        });
+        });*/
      /*   scanButton = (Button) findViewById(R.id.Scan);
         scanButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -177,6 +178,7 @@ public class BTMainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG,"点击的是第"+position+"\n");
+                mConnectService.AcceptStop();
                 connectDev = NewDevicesAdapter.getItem(position);
                 mConnectService.connect(connectDev, BTMainActivity.this,mHandler);
                 isClient = true;

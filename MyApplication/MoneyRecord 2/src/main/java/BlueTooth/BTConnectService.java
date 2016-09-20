@@ -168,6 +168,13 @@ public class BTConnectService {
     /**
      * Stop all threads
      */
+    public void AcceptStop(){
+        if (mSecureAcceptThread != null) {
+            Log.d(TAG,"acceptstop方法关闭acceptthread");
+            mSecureAcceptThread.cancel();
+            mSecureAcceptThread = null;
+        }
+    }
     public synchronized void stop() {
         Log.d(TAG, "stop");
 
@@ -255,7 +262,7 @@ while(true){
                 socket = mmServerSocket.accept();
                 Log.d(TAG, "开启监听线程，等待连接");
             } catch (IOException e) {
-                Log.e(TAG, "失败了哈哈哈哈", e);
+                Log.e(TAG, "server socket被关掉了哈哈哈哈哈哈");
                 break;
             }
             // If a connection was accepted
