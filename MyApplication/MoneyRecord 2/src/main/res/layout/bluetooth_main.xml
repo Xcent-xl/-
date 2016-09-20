@@ -24,6 +24,7 @@
     android:text="准备接收"
 
  />
+    <!--
 <Button
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -31,6 +32,7 @@
     android:text="扫描设备"
     android:layout_above="@+id/title"
     android:layout_alignParentEnd="true" />
+    -->
 <TextView
     android:id="@+id/title"
     android:layout_width="wrap_content"
@@ -42,7 +44,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/title"/>
-
+<!--
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,7 +52,7 @@
         android:id="@+id/ClientBtn"
         android:layout_alignParentTop="true"
         android:layout_toStartOf="@+id/Scan" />
-
+-->
     <Button
 
         android:layout_width="wrap_content"
@@ -58,7 +60,8 @@
         android:text="发送"
         android:id="@+id/sentMsg"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:visibility="gone"/>
 </RelativeLayout>
 
 </LinearLayout>

@@ -29,6 +29,7 @@ public class BTConnectService {
 
     public static final int MESSAGE_CLIENT_CONNECTED = 1;
     public static final int MESSAGE_SERVER_CONNECTED = 2;
+    private static final int CONNECT_SUCCEED = 5;
     private Context mContext;
     // Debugging
     private static final String TAG = "BluetoothChatService";
@@ -171,16 +172,19 @@ public class BTConnectService {
         Log.d(TAG, "stop");
 
         if (mConnectThread != null) {
+            Log.d(TAG,"stop方法关闭connectthread");
             mConnectThread.cancel();
             mConnectThread = null;
         }
 
         if (mConnectedThread != null) {
+            Log.d(TAG,"stop方法关闭connectedthread");
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
 
         if (mSecureAcceptThread != null) {
+            Log.d(TAG,"stop方法关闭acceptthread");
             mSecureAcceptThread.cancel();
             mSecureAcceptThread = null;
         }
@@ -241,38 +245,30 @@ public class BTConnectService {
         public void run() {
 
 
-
             BluetoothSocket socket = null;
 
             // Listen to the server socket if we're not connected
-
-                try {
-                    // This is a blocking call and will only return on a
-                    // successful connection or an exception
-                    socket = mmServerSocket.accept();
-                    Log.d(TAG,"开启监听线程，等待连接");
-                } catch (IOException e) {
-                    Log.e(TAG, "失败了哈哈哈哈哈哈哈", e);
-                    try {
-                        socket.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                        Log.d(TAG,"服务端socket错误，关闭socket失败");
-                    }
-
-
-                }
-                // If a connection was accepted
-                if (socket != null) {
-                    Log.d(TAG,"服务端socket建立成功，socket信息："+socket+"\n"+"正在建立connectedthread");
-                    mConnectedThread = new ConnectedThread(socket, mmContext, mmhandler);
-                    mConnectedThread.start();
-                    Message msg = mhandler.obtainMessage(MESSAGE_SERVER_CONNECTED);
-                    mhandler.sendMessage(msg);
+while(true){
+            try {
+                // This is a blocking call and will only return on a
+                // successful connection or an exception
+                socket = mmServerSocket.accept();
+                Log.d(TAG, "开启监听线程，等待连接");
+            } catch (IOException e) {
+                Log.e(TAG, "失败了哈哈哈哈", e);
+                break;
+            }
+            // If a connection was accepted
+            if (socket != null) {
+                Log.d(TAG, "服务端socket建立成功，socket信息：" + socket + "\n" + "正在建立connectedthread");
+                mConnectedThread = new ConnectedThread(socket, mmContext, mmhandler);
+                mConnectedThread.start();
+                Message msg = mhandler.obtainMessage(MESSAGE_SERVER_CONNECTED);
+                mhandler.sendMessage(msg);
 
 
-
-                }
+            }
+        }
             }
 
 
@@ -280,11 +276,15 @@ public class BTConnectService {
 
         public void cancel() {
 
+
             try {
+
                 mmServerSocket.close();
             } catch (IOException e) {
-
+                e.printStackTrace();
+                Log.d(TAG,"CANCEL调用过程中关闭socket出错");
             }
+
         }
     }
 
@@ -430,6 +430,8 @@ public class BTConnectService {
         }
         public void run() {
             Log.i(TAG, "ConnectedThread开始运行...监听输入");
+            Message msg = mhandler.obtainMessage(CONNECT_SUCCEED);
+            mhandler.sendMessage(msg);
 
 
             // Keep listening to the InputStream while connected
@@ -445,11 +447,11 @@ public class BTConnectService {
                     if(insertMoney((List<Money>)readMsg.get(1),mmmContext)) flag=true;
                     if(flag)
                     {
-                        Message msg = mhandler.obtainMessage(MESSAGE_SEND_SUCCEED);
+                        msg = mhandler.obtainMessage(MESSAGE_SEND_SUCCEED);
                         mhandler.sendMessage(msg);
                     }
                     else {
-                        Message msg = mhandler.obtainMessage(MESSAGE_SEND_FALSE);
+                        msg = mhandler.obtainMessage(MESSAGE_SEND_FALSE);
                         mhandler.sendMessage(msg);
                     }
                     // Toast.makeText(context, "已插入数据表，请手动刷新页面", Toast.LENGTH_SHORT).show();

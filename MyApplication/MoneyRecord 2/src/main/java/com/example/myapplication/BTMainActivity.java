@@ -35,9 +35,10 @@ public class BTMainActivity extends AppCompatActivity {
      */
     private static final String TAG = BTMainActivity.class.getSimpleName();
 
+    private boolean isClient = false;
     private Button sendMsgBtn;
-    private Button scanButton;
-    private Button ClientBtn;
+    //private Button scanButton;
+   // private Button ClientBtn;
     private Button ServerBtn;
     private BTConnectService mConnectService;
 
@@ -45,6 +46,7 @@ public class BTMainActivity extends AppCompatActivity {
     private TextView Info;
 
     private ArrayAdapter<BluetoothDevice> NewDevicesAdapter;
+    private BluetoothDevice connectDev;
 
     private List<Object> msg;
 
@@ -53,6 +55,7 @@ public class BTMainActivity extends AppCompatActivity {
     public static final int MESSAGE_SERVER_CONNECTED = 2;
     private static final int MESSAGE_SEND_FALSE = 3;
     private static final int MESSAGE_SEND_SUCCEED = 4;
+    private static final int CONNECT_SUCCEED = 5;
     /**
      * Member fields
      */
@@ -61,6 +64,10 @@ public class BTMainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
+                case CONNECT_SUCCEED:
+                    sendMsgBtn.setVisibility(View.VISIBLE);
+                    //吧发送按钮设为可见
+                    break;
 
                 case MESSAGE_CLIENT_CONNECTED:
                     Info.setText("已和服务端连接..."+"准备数据传输...");
@@ -123,7 +130,7 @@ public class BTMainActivity extends AppCompatActivity {
 
         Info = (TextView)findViewById(R.id.ConnectInfo);
         mConnectService = new BTConnectService(this, mHandler);
-        ClientBtn = (Button)findViewById(R.id.ClientBtn);
+     /*   ClientBtn = (Button)findViewById(R.id.ClientBtn);
         ClientBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +139,7 @@ public class BTMainActivity extends AppCompatActivity {
             }
 
         });
+        */
         ServerBtn = (Button)findViewById(R.id.serverMode);
         ServerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,17 +147,19 @@ public class BTMainActivity extends AppCompatActivity {
 
                 Log.d(TAG,"进入服务监听模式");
                 mConnectService.start();
+                isClient = false;
                //doListen();
             }
 
         });
-        scanButton = (Button) findViewById(R.id.Scan);
+     /*   scanButton = (Button) findViewById(R.id.Scan);
         scanButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 NewDevicesAdapter.clear();
                 doDiscovery();
             }
         });
+        */
         sendMsgBtn = (Button)findViewById(R.id.sentMsg);
         sendMsgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,14 +177,24 @@ public class BTMainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG,"点击的是第"+position+"\n");
+                connectDev = NewDevicesAdapter.getItem(position);
+                mConnectService.connect(connectDev, BTMainActivity.this,mHandler);
+                isClient = true;
 
-                mConnectService.connect(NewDevicesAdapter.getItem(position),BTMainActivity.this,mHandler);
 
 
             }
         });
 
 
+        // Get the local Bluetooth adapter
+        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        if( !mBtAdapter.isEnabled()){
+            Intent enabler=new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enabler,1);
+        }
+        NewDevicesAdapter.clear();
+        doDiscovery();
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -184,10 +204,25 @@ public class BTMainActivity extends AppCompatActivity {
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
 
-        // Get the local Bluetooth adapter
-        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
+
+    }
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "start onPause~~~");
+        mConnectService.stop();
+    }
+    protected void onRestart() {
+        super.onRestart();
+        Log.e(TAG, "start onRestart~~~");
+        if(isClient){
+            mConnectService.connect(connectDev, BTMainActivity.this,mHandler);
+        }else{
+
+            mConnectService.start();
+
+        }
     }
 
     @Override
